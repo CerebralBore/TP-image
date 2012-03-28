@@ -1,14 +1,51 @@
 #include <highgui.h>
 #include <iostream>
 
+cv::Vec3b filtreMatrice(cv::Mat matImage, cv::Mat matFiltre)
+{
+	int coef = 0;
+	int totalR = 0;
+	int totalG = 0;
+	int totalB = 0;
+	cv::Vec3b pix;
+	for(int i=0; i<matImage.rows; i++)
+	{
+		for(int j=0; j<matImage.cols; j++)
+		{
+			coef = coef + matFiltre.at<double>(i,j);
+			totalR = totalR + matImage.at<cv::Vec3b>(i,j)[2] * matFiltre.at<double>(i,j);
+			totalG = totalG + matImage.at<cv::Vec3b>(i,j)[1] * matFiltre.at<double>(i,j);
+			totalB = totalB + matImage.at<cv::Vec3b>(i,j)[0] * matFiltre.at<double>(i,j);
+		}
+	}
+	pix[2] = totalR/coef;
+	pix[1] = totalG/coef;
+	pix[0] = totalB/coef;
 
-cv::Mat filtreQuentin(cv::Mat imageS){
+	return(pix);
+}
 
+
+cv::Mat filtreImage(cv::Mat imageS)
+{
+	cv::Range row;
+	cv::Range col;
 	double m[3][3] = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-	cv::Mat( 3, 3, CV_32FC2, m);
+	cv::Mat filtre = cv::Mat(3, 3, CV_64F, m);
 	cv::Mat imageF = imageS.clone();
 
-	for(int i=0;
+	cv::Mat matImage;
+	for(int i=1; i<(imageS.rows-1); i++)
+	{
+		for(int j=1; j<(imageS.cols-1); j++)
+		{
+			row = cv::Range((i-1),(i+2));
+			col = cv::Range((j-1),(j+2));
+			matImage = cv::Mat(imageS, row, col);
+			imageF.at<cv::Vec3b>(i,j) = filtreMatrice(matImage, filtre);
+		}
+	}
+	return imageF;
 }
 
 int main (int argc, char* argv[])
@@ -27,7 +64,7 @@ int main (int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	cv::Mat img2 = filtre(img1);
+	cv::Mat img2 = filtreImage(img1);
 
 	cv::imshow("lena", img1);
 	cv::waitKey ();
