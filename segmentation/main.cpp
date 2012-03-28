@@ -48,34 +48,107 @@ cv::Mat filtreImage(cv::Mat imageS)
 	return imageF;
 }
 
+
+cv::Mat gris(cv::Mat imageS)
+{
+	cv::Mat imageF = imageS.clone();
+	int red, blue, green;
+
+	for(int i=0; i<(imageS.rows); i++)
+	{
+		for(int j=0; j<(imageS.cols); j++)
+		{	
+			//remplir d'une couleur
+			//imageF.at<cv::Vec3b>(i,j) = cv::Vec3b(255,255,255);
+			//channels
+			 red = imageF.at<cv::Vec3b>(i,j)[2];
+			 blue = imageF.at<cv::Vec3b>(i,j)[0];
+			 green = imageF.at<cv::Vec3b>(i,j)[1];
+			 for(int k=0; k<3; k++){
+				imageF.at<cv::Vec3b>(i,j)[k] = (red + blue + green)/3 ;
+			 }
+		}
+	}
+		
+return imageF;
+}
+
+cv::Mat normalize(cv::Mat imageS)
+{
+	cv::Mat imageF = imageS.clone();
+	int min, max;
+
+	for(int k=0; k<3; k++)
+	{
+		//initialisation
+		min = 255;
+		max = 0;
+
+		//recherche du maximum et minimum de l'histogramme dans l'image
+		for(int i=0; i<imageS.rows; i++)
+		{
+			for(int j=0; j<imageS.cols; j++)
+			{	
+				if(imageF.at<cv::Vec3b>(i,j)[k] < min){
+					min = imageF.at<cv::Vec3b>(i,j)[k];
+				}
+				if(imageF.at<cv::Vec3b>(i,j)[k] > max){
+					max = imageF.at<cv::Vec3b>(i,j)[k];
+				}
+			}
+		}
+
+		std::cout<<k<<" "<<min<<" "<<max<<std::endl;
+	
+		//etirement de l'histogramme
+		for(int i=0; i<imageS.rows; i++)
+		{
+			for(int j=0; j<imageS.cols; j++)
+			{	
+				imageF.at<cv::Vec3b>(i,j)[k] = (imageF.at<cv::Vec3b>(i,j)[k] - min) * 255/(max-min); 
+			 }
+		}
+	}
+return imageF;
+}
+
 int main (int argc, char* argv[])
 {
-	// Chemin des images
+	// Initialisation
 	std::string path1 = "../image/lena.jpg";
 	std::string path2 = "../image/lenaModif.jpg";
 
 	// Ouverture de l'image
-	cv::Mat img1 = cv::imread (path1);
-
-	if (img1.empty ())
-	{
+	cv::Mat imgO = cv::imread (path1);
+	if (imgO.empty ()){
 		std::cerr << "Couldn't open image: " << path1 << std::endl;
 		cv::waitKey ();
 		return EXIT_FAILURE;
 	}
-
-	cv::Mat img2 = filtreImage(img1);
-
-	cv::imshow("lena", img1);
-	cv::waitKey ();
-	cv::imshow("lenaModif", img2);
-	cv::imwrite(path2,img2);
-
 	
+	//application du filtre
+	cv::Mat imgF = filtreImage(imgO);
+	cv::Mat imgGris = gris(imgO);
+	cv::Mat imgGrisN = normalize(imgGris);
+	cv::Mat imgN = normalize(imgO);
+	
+	//affichage
+	cvResizeWindow("win1",300,300);
+
+	cv::imshow("lena", imgO);
+	cv::waitKey ();
+	cv::imshow("lenaFiltre", imgF);
+	cv::waitKey ();
+	cv::imshow("lenaGris", imgGris);
+	cv::waitKey ();
+	cv::imshow("lenaGrisNormalize", imgGrisN);
+	cv::waitKey ();
+	cv::imshow("lenaNormalize", imgN);
+
+	//ecriture
+	cv::imwrite(path2,imgGrisN);
 
 	std::cout << "Appuyez sur une touche pour continuer" << std::endl;
 	cv::waitKey ();
-
-
 	return EXIT_SUCCESS;
 }
