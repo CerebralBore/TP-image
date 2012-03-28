@@ -2,10 +2,13 @@
 #include <iostream>
 
 
-void filtre(cv::Mat image){
+cv::Mat filtreQuentin(cv::Mat imageS){
 
 	double m[3][3] = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
 	cv::Mat( 3, 3, CV_32FC2, m);
+	cv::Mat imageF = imageS.clone();
+
+	for(int i=0;
 }
 
 int main (int argc, char* argv[])
@@ -24,14 +27,14 @@ int main (int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	cv::Mat img2 = img1.clone();
+	cv::Mat img2 = filtre(img1);
 
 	cv::imshow("lena", img1);
 	cv::waitKey ();
 	cv::imshow("lenaModif", img2);
 	cv::imwrite(path2,img2);
 
-	filtre(img1);
+	
 
 	std::cout << "Appuyez sur une touche pour continuer" << std::endl;
 	cv::waitKey ();
