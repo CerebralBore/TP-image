@@ -4,14 +4,13 @@
 
 void filtre(cv::Mat image){
 
-	double m[3][3] = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};  
-	cv::Mat( 3, 3, CV_32FC2, m);	
-	//image * filtre;
+	double m[3][3] = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+	cv::Mat( 3, 3, CV_32FC2, m);
 }
 
 int main (int argc, char* argv[])
 {
-	// Remplacez la variable path par le chemin d'une image sur votre machine
+	// Chemin des images
 	std::string path1 = "../image/lena.jpg";
 	std::string path2 = "../image/lenaModif.jpg";
 
@@ -27,7 +26,6 @@ int main (int argc, char* argv[])
 
 	cv::Mat img2 = img1.clone();
 
-	// Affichage de l'image dans une fenêtre intitulée "Hello World!"
 	cv::imshow("lena", img1);
 	cv::waitKey ();
 	cv::imshow("lenaModif", img2);
@@ -35,7 +33,6 @@ int main (int argc, char* argv[])
 
 	filtre(img1);
 
-	// Pause
 	std::cout << "Appuyez sur une touche pour continuer" << std::endl;
 	cv::waitKey ();
 
