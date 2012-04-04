@@ -18,9 +18,18 @@ cv::Vec3b filtreMatrice(cv::Mat matImage, cv::Mat matFiltre)
 			totalB = totalB + matImage.at<cv::Vec3b>(i,j)[0] * matFiltre.at<double>(i,j);
 		}
 	}
-	pix[2] = totalR/coef;
-	pix[1] = totalG/coef;
-	pix[0] = totalB/coef;
+	if(coef !=0)
+	{
+		pix[2] = totalR/coef;
+		pix[1] = totalG/coef;
+		pix[0] = totalB/coef;
+	}
+	else
+	{
+		pix[2] = totalR;
+		pix[1] = totalG;
+		pix[0] = totalB;
+	}
 
 	return(pix);
 }
@@ -118,15 +127,17 @@ cv::Mat normalize(cv::Mat imageS)
 	}
 	return imageF;
 }
+
 int main (int argc, char* argv[])
 {
 	// Initialisation
-	std::string path1 = "../image/lena.jpg";
+	std::string path1 = "../image/lena2.jpg";
 	std::string path2 = "../image/lenaModif.jpg";
 
 	// Ouverture de l'image
 	cv::Mat imgO = cv::imread (path1);
-	if (imgO.empty ()){
+	if (imgO.empty ())
+	{
 		std::cerr << "Couldn't open image: " << path1 << std::endl;
 		cv::waitKey ();
 		return EXIT_FAILURE;
