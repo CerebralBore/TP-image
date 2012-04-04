@@ -30,7 +30,7 @@ cv::Mat filtreImage(cv::Mat imageS)
 {
 	cv::Range row;
 	cv::Range col;
-	double m[3][3] = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+	double m[3][3] = {{3, 7, 3}, {7, 16, 7}, {3, 7, 3}};
 	cv::Mat filtre = cv::Mat(3, 3, CV_64F, m);
 	cv::Mat imageF = imageS.clone();
 
@@ -100,96 +100,24 @@ cv::Mat normalize(cv::Mat imageS)
 			}
 		}
 
-		std::cout<<k<<" "<<min<<" "<<max<<std::endl;
+		std::cout<<"canal "<<k<<" min "<<min<<" max "<<max<<std::endl;
 
 		//pour éviter la division par zéro en cas de couleur uniforme
-		if(min == max){
+		if(min != max){
 			//etirement de l'histogramme
 			for(int i=0; i<imageS.rows; i++)
 			{
 				for(int j=0; j<imageS.cols; j++)
-				{		
-					imageF.at<cv::Vec3b>(i,j)[k] = (imageF.at<cv::Vec3b>(i,j)[k] - min) * 255/(max-min); 
+				{	
+					imageF.at<cv::Vec3b>(i,j)[k] = ((imageF.at<cv::Vec3b>(i,j)[k] - min) * 255 )/(max-min); 
 				}
 			}
 		}
+		std::cout<<"image étirée :canal "<<k<<" min "<<min<<" max "<<max<<std::endl;
+
 	}
 	return imageF;
 }
-
-cv::Mat egalize(cv::Mat imageS){
-
-	cv::Mat imageF = imageS.clone();
-
-	int Somme = 0 ;
-	int H[3][256];
-	//histogramme réel entre 0 et 1
-	double Hr[3][256];
-	int Hc[3][256];
-	
-
-		//initialisation
-		int min = 255;
-		int max = 0;
-
-		//recherche du maximum et minimum de l'histogramme dans l'image
-		for(int i=0; i<imageS.rows; i++)
-		{
-			for(int j=0; j<imageS.cols; j++)
-			{	
-				for(int k=0; k<3; k++){
-					if(imageF.at<cv::Vec3b>(i,j)[k] < min){
-						min = imageF.at<cv::Vec3b>(i,j)[k];
-					}
-					if(imageF.at<cv::Vec3b>(i,j)[k] > max){
-						max = imageF.at<cv::Vec3b>(i,j)[k];
-					}
-				}
-			}
-		}
-
-	//créer histogramme
-	for(int i=0; i<imageF.rows; i++)
-	{
-		for(int j=0; j<imageF.cols; j++)
-		{	
-			for(int k=0; k<3; k++){	
-
-				H[k][imageF.at<cv::Vec3b>(i,j)[k]] +=1;
-			}
-		}
-	}
-	
-	for(int i=0; i<256; i++)
-	{
-			for(int k=0; k<3; k++){	
-				Hr[k][i] = H[k][i] / (imageS.rows*imageS.cols);
-			}
-	}
-
-	//histogramme cumulé
-		for(int j=0; j<256; j++)
-		{	
-			for(int k=0; k<3; k++){	
-				Somme += Hr[k][j] ;
-				Hc[k][j] = Somme;
-			}
-		}
-	
-	//egalisation
-	for(int i=0; i<imageF.rows; i++)
-	{
-		for(int j=0; j<imageF.cols; j++)
-		{		
-			for(int k=0; k<3; k++){	
-				imageF.at<cv::Vec3b>(i,j)[k] = pow((double)2,(double)(max-min))* Hc[k][i]/(imageF.rows*imageF.cols); 
-			}	
-		}
-	}
-
-return imageF;
-}
-
 int main (int argc, char* argv[])
 {
 	// Initialisation
@@ -209,7 +137,6 @@ int main (int argc, char* argv[])
 	cv::Mat imgGris = gris(imgO);
 	cv::Mat imgGrisN = normalize(imgGris);
 	cv::Mat imgN = normalize(imgO);
-	cv::Mat imgE = egalize(imgO);
 
 	//affichage
 	cvResizeWindow("win1",300,300);
@@ -224,7 +151,6 @@ int main (int argc, char* argv[])
 	cv::waitKey ();
 	cv::imshow("lenaNormalize", imgN);
 	cv::waitKey ();
-	cv::imshow("lenaEgalize", imgE);
 
 	//ecriture
 	cv::imwrite(path2,imgGrisN);
@@ -233,3 +159,4 @@ int main (int argc, char* argv[])
 	cv::waitKey ();
 	return EXIT_SUCCESS;
 }
+
