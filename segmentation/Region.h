@@ -8,27 +8,40 @@ class Region
 {
 private:
 	bool alive;
+	double coulInitR;
+	double coulInitV;
+	double coulInitB;
 	double coulTotR;
 	double coulTotV;
 	double coulTotB;
 	int nbPixel;
+	int cadreH;
+	int cadreG;
+	int cadreB;
+	int cadreD;
 	std::vector<Pixel> frontiere;
 
 public:
 	Region(void);
-	Region(int, int);
+	Region(int x, int y, int rows, int cols);
 	~Region(void);
 	int size();
-	int getPixelX(int);
-	int getPixelY(int);
+	int getPixelX(int p);
+	int getPixelY(int p);
 	int nbPix();
-	void addPix(double, double, double);
-	void setFrontiere(std::vector<Pixel>);
+	void addPix(double r, double v, double b);
+	void setFrontiere(std::vector<Pixel> pixels);
 	double moyR();
 	double moyV();
 	double moyB();
-	bool compare(double, double, double, double);
-	Pixel getPixel(int);
+	bool compare(double r, double v, double b, double seuil);
+	Pixel getPixel(int pixel);
+	void pixelCadre(int x, int y);
+	void regionCadre(int xH, int yG, int xB, int yD);
+	int getCadreH();
+	int getCadreG();
+	int getCadreB();
+	int getCadreD();
 	void mmmmmmmonsterKill();
 	bool isAlive();
 
