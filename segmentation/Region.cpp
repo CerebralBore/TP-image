@@ -9,9 +9,6 @@ Region::Region(void)
 Region::Region(int x, int y, int rows, int cols)
 {
 	alive = true;
-	coulInitR = -1;
-	coulInitV = -1;
-	coulInitB = -1;
 	coulTotR = 0;
 	coulTotV = 0;
 	coulTotB = 0;
@@ -28,19 +25,29 @@ Region::~Region(void)
 {
 }
 
-int Region::size()
+int Region::sizeFr()
 {
 	return frontiere.size();
 }
 
-int Region::getPixelX(int p)
+int Region::getFrPixelX(int p)
 {
 	return frontiere[p].x();
 }
 
-int Region::getPixelY(int p)
+int Region::getFrPixelY(int p)
 {
 	return frontiere[p].y();
+}
+
+Pixel Region::getFrPixel(int pixel)
+{
+	return frontiere[pixel];
+}
+
+void Region::insertFrPixel(Pixel pixel)
+{
+	frontiere.push_back(pixel);
 }
 
 int Region::nbPix()
@@ -50,12 +57,6 @@ int Region::nbPix()
 
 void Region::addPix(double r, double v, double b)
 {
-	/*if(coulInitR == -1)
-	{
-		coulInitR = r;
-		coulInitV = v;
-		coulInitB = b;
-	}*/
 	coulTotR += r;
 	coulTotV += v;
 	coulTotB += b;
@@ -86,11 +87,6 @@ double Region::moyB()
 
 bool Region::compare(double r, double v, double b, double seuil)
 {
-	/*if( r > coulInitR-seuil && r < coulInitR+seuil)
-	{
-		if( v > coulInitV-seuil && v < coulInitV+seuil)
-		{
-			if( b > coulInitB-seuil && b < coulInitB+seuil)*/
 	if( r > moyR()-seuil && r < moyR()+seuil)
 	{
 		if( v > moyV()-seuil && v < moyV()+seuil)
@@ -104,11 +100,6 @@ bool Region::compare(double r, double v, double b, double seuil)
 		else { return false; }
 	}
 	else { return false; }
-}
-
-Pixel Region::getPixel(int pixel)
-{
-	return frontiere[pixel];
 }
 
 void Region::pixelCadre(int x, int y)

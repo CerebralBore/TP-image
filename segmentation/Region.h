@@ -8,9 +8,6 @@ class Region
 {
 private:
 	bool alive;
-	double coulInitR;
-	double coulInitV;
-	double coulInitB;
 	double coulTotR;
 	double coulTotV;
 	double coulTotB;
@@ -25,9 +22,11 @@ public:
 	Region(void);
 	Region(int x, int y, int rows, int cols);
 	~Region(void);
-	int size();
-	int getPixelX(int p);
-	int getPixelY(int p);
+	int sizeFr();
+	int getFrPixelX(int p);
+	int getFrPixelY(int p);
+	Pixel getFrPixel(int pixel);
+	void insertFrPixel(Pixel pixel);
 	int nbPix();
 	void addPix(double r, double v, double b);
 	void setFrontiere(std::vector<Pixel> pixels);
@@ -35,7 +34,6 @@ public:
 	double moyV();
 	double moyB();
 	bool compare(double r, double v, double b, double seuil);
-	Pixel getPixel(int pixel);
 	void pixelCadre(int x, int y);
 	void regionCadre(int xH, int yG, int xB, int yD);
 	int getCadreH();
