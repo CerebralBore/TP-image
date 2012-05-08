@@ -142,7 +142,7 @@ void slipMerge(vector<Region>& reg, cv::Mat& img, int H, int B, int G, int D)
 		return;
 	}
 
-	double seuil = 5.0;
+	double seuil = 30.0;
 
 	double ecartTypeR =0.0;
 	double ecartTypeV =0.0;
@@ -180,9 +180,14 @@ void slipMerge(vector<Region>& reg, cv::Mat& img, int H, int B, int G, int D)
 	}
 
 	//écart type
-	ecartTypeR /= ( (B - H) * (D - G) );
-	ecartTypeV /= ( (B - H) * (D - G) );
-	ecartTypeB /= ( (B - H) * (D - G) );
+	//ecartTypeR /= ( (B - H) * (D - G) );
+	//ecartTypeV /= ( (B - H) * (D - G) );
+	//ecartTypeB /= ( (B - H) * (D - G) );
+
+	ecartTypeR *= moyR;
+	ecartTypeV *= moyV;
+	ecartTypeB *= moyB;
+
 
 	ecartTypeR = sqrt(ecartTypeR);
 	ecartTypeV = sqrt(ecartTypeR);
@@ -315,7 +320,7 @@ cv::Mat regionGrowing(cv::Mat imageS, double seuil, int germe)
 							}
 
 							//sinon si c'est une germe ou si le pixel a la même couleur que la region courante alors ...
-							else if(regions[k].nbPix() == 0 || regions[k].compare( imageS.at<cv::Vec3b>(x, y)[2], imageS.at<cv::Vec3b>(x, y)[1], imageS.at<cv::Vec3b>(x, y)[0], seuil)/* && imageR[x*lig+y] < 0*/ )
+							else if(regions[k].nbPix() == 0 || regions[k].compare( imageS.at<cv::Vec3b>(x, y)[2], imageS.at<cv::Vec3b>(x, y)[1], imageS.at<cv::Vec3b>(x, y)[0], seuil) && imageR[x*lig+y] < 0 )
 							{
 								regions[k].addPix(imageS.at<cv::Vec3b>(x, y)[2],imageS.at<cv::Vec3b>(x, y)[1],imageS.at<cv::Vec3b>(x, y)[0]);
 								regions[k].pixelCadre(x, y);
@@ -378,10 +383,7 @@ cv::Mat regionGrowing(cv::Mat imageS, double seuil, int germe)
 									}
 								}
 							}
-							else
-							{
-								pixels.push_back(Pixel(x,y));
-							}
+							pixels.push_back(Pixel(x,y));
 						}
 					}
 					//actualise le tableau frontiere
@@ -393,42 +395,27 @@ cv::Mat regionGrowing(cv::Mat imageS, double seuil, int germe)
 			{
 				for(int j = 0; j < imageS.cols; j++)
 				{
-					imageF.at<cv::Vec3b>(i,j)[2] = (imageR[i*lig+j]*64)%255;
-					imageF.at<cv::Vec3b>(i,j)[1] = (imageR[i*lig+j]*64)%255;
-					imageF.at<cv::Vec3b>(i,j)[0] = (imageR[i*lig+j]*64)%255;
+					if(imageR[i*lig+j] == -1)
+					{
+						imageF.at<cv::Vec3b>(i,j)[2] = 255.;
+						imageF.at<cv::Vec3b>(i,j)[1] = 255.;
+						imageF.at<cv::Vec3b>(i,j)[0] = 255.;
+					}
+					else
+					{
+						imageF.at<cv::Vec3b>(i,j)[2] = regions[imageR[i*lig+j]].moyR();
+						imageF.at<cv::Vec3b>(i,j)[1] = regions[imageR[i*lig+j]].moyV();
+						imageF.at<cv::Vec3b>(i,j)[0] = regions[imageR[i*lig+j]].moyB();
+					}
 				}
 			}
 			cv::imshow("lenaRegion", imageF);
-			cv::waitKey(5);
+			cv::waitKey(10);
 			//cv::waitKey ();
 		}while(changement !=0);
 		/*germe = germe/2;
 	}*/
 	//rendu de l'imageF
-	for(int k = 0; k < regions.size(); k++)
-	{
-		if(regions[k].isAlive())
-		{
-			/*coulR = rand()%127 + 64;
-			coulV = rand()%127 + 64;
-			coulB = rand()%127 + 64;*/
-			coulR = regions[k].moyR();
-			coulV = regions[k].moyV();
-			coulB = regions[k].moyB();
-			for(int i = 0; i < imageS.rows; i++)
-			{
-				for(int j = 0; j < imageS.cols; j++)
-				{
-					if(imageR[i*lig+j] == k)
-					{
-						imageF.at<cv::Vec3b>(i,j)[2] = coulR;
-						imageF.at<cv::Vec3b>(i,j)[1] = coulV;
-						imageF.at<cv::Vec3b>(i,j)[0] = coulB;
-					}
-				}
-			}
-		}
-	}
 	for(int i = 0; i < imageS.rows; i++)
 	{
 		for(int j = 0; j < imageS.cols; j++)
@@ -438,6 +425,12 @@ cv::Mat regionGrowing(cv::Mat imageS, double seuil, int germe)
 				imageF.at<cv::Vec3b>(i,j)[2] = 255.;
 				imageF.at<cv::Vec3b>(i,j)[1] = 255.;
 				imageF.at<cv::Vec3b>(i,j)[0] = 255.;
+			}
+			else
+			{
+				imageF.at<cv::Vec3b>(i,j)[2] = regions[imageR[i*lig+j]].moyR();
+				imageF.at<cv::Vec3b>(i,j)[1] = regions[imageR[i*lig+j]].moyV();
+				imageF.at<cv::Vec3b>(i,j)[0] = regions[imageR[i*lig+j]].moyB();
 			}
 		}
 	}
@@ -493,7 +486,7 @@ cv::Mat regionGrowing(cv::Mat imageS, double seuil, int germe)
 int main (int argc, char* argv[])
 {
 	// Initialisation
-	std::string path1 = "../image/balls0.jpg";
+	std::string path1 = "../image/bally_0.jpg";
 	std::string path2 = "../image/lenaModif.jpg";
 
 	// Ouverture de l'image
